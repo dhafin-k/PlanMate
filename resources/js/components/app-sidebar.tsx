@@ -23,12 +23,12 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
-        title: 'Lists',
+        title: 'Mapel',
         href: '/lists',
         icon: ClipboardList,
     },
     {
-        title: 'Tasks',
+        title: 'Tugas',
         href: '/tasks',
         icon: ListTodo,
     },

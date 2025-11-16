@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ListTable;
 use Illuminate\Http\Request;
 use App\Models\TaskTable;
 use Illuminate\Support\Facades\Auth;
@@ -14,7 +15,7 @@ class ListController extends Controller
      */
     public function index()
     {
-        $lists = TaskTable::where('user_id', Auth::user()->id)->get();
+        $lists = ListTable::where('user_id', Auth::user()->id)->get();
         return Inertia::render('admin/Lists/Index',[
             'lists' => $lists,
             'flash' =>[
@@ -42,12 +43,12 @@ class ListController extends Controller
             'deskripsi' => 'nullable|string|max:255',
         ]);
 
-        TaskTable::create([
+        ListTable::create([
             'judul' => $validated['judul'],
             'deskripsi' => $validated['deskripsi'] ?? null,
             'user_id' => Auth::id(),
         ]);
-        return redirect()->route('lists.index')->with('success', 'List created successfully.');
+        return redirect()->route('lists.index')->with('success', 'Matapelajaran berhasil dibuat.');
     }
 
     /**
@@ -69,7 +70,7 @@ class ListController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, TaskTable $list)
+    public function update(Request $request, ListTable $list)
     {
         $validated = $request->validate([
             'judul' => 'required|string|max:255',
@@ -77,15 +78,15 @@ class ListController extends Controller
         ]);
 
         $list->update($validated);
-        return redirect()->route('lists.index')->with('success', 'Tugas Berhasil diupdate.');
+        return redirect()->route('lists.index')->with('success', 'Matapelajaran Berhasil diupdate.');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(TaskTable $list)
+    public function destroy(ListTable $list)
     {
         $list -> delete();
-        return redirect()->route('lists.index')->with('success', 'List deleted successfully.');
+        return redirect()->route('lists.index')->with('success', 'Matapelajaran Berhasil dihapus.');
     }
 }
