@@ -30,7 +30,7 @@ interface Props {
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Lists',
+        title: 'Mapel',
         href: '/lists',
     }
 ];
@@ -106,7 +106,7 @@ export default function ListsIndex({ lists, flash }: Props){
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title='Lists'/>
+            <Head title='Matapelajaran'/>
             <div className='flex h-full flex-1 flex-col gap-4 rounded-xl px-8 pt-4'>
                 {showToast && (
                     <div className={`fixed top-4 right-4 z-50 items-center flex gap-2 rounded-lg p-4 shadow-lg ${
@@ -121,17 +121,17 @@ export default function ListsIndex({ lists, flash }: Props){
                     </div>
                 )}
                 <div className='flex justify-between items-center'>
-                    <h1 className='text-2xl font-bold'>Lists</h1>
+                    <h1 className='text-2xl font-bold'>Matapelajaran</h1>
                     <Dialog open={isOpen} onOpenChange={setIsOpen}>
                         <DialogTrigger asChild>
                             <Button>
                                 <Plus className='h-4 w-4 mr-2'/>
-                                Tugas Baru
+                                List Baru
                             </Button>
                         </DialogTrigger>
                         <DialogContent>
                             <DialogHeader>
-                                <DialogTitle>{editingList ? 'Edit List' : 'Tugas Baru'}</DialogTitle>
+                                <DialogTitle>{editingList ? 'Edit List' : 'List Baru'}</DialogTitle>
                                 <DialogDescription>
                                     {editingList ? 'Ubah informasi list Anda' : 'Buat list baru untuk mengorganisir tasks Anda'}
                                 </DialogDescription>
