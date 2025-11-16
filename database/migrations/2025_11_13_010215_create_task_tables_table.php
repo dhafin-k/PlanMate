@@ -14,11 +14,11 @@ return new class extends Migration
         Schema::create('task_tables', function (Blueprint $table) {
             $table->id();
             $table->string('judul', 255);
-            $table->string('deskripsi', 255);
-            $table->boolean('selesai')->default(false);
+            $table->string('deskripsi', 255)->nullable();
+            $table->boolean('sudah_selesai')->default(false);
             $table->date('deadline')->nullable();
+            $table->foreignId('list_id')->constrained('list_tables')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-
             $table->timestamps();
         });
     }
