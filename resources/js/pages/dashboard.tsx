@@ -2,11 +2,21 @@ import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
-import { List, CheckCircle, Clock, AlertCircle, Plus } from 'lucide-react';
-import { Card, CardContent, CardTitle, CardHeader } from '@/components/ui/card';
+import { List, CheckCircle, Clock, AlertCircle, Plus, Users } from 'lucide-react';
+import { Card, CardContent, CardTitle, CardHeader, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button  } from '@/components/ui/button';
 import { Link  } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
 import { Breadcrumb } from '@/components/ui/breadcrumb';
+import { TrendingUp } from "lucide-react"
+import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart"
+
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -15,22 +25,57 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
+interface ChartDataPoint {
+    month: string;
+    tasks: number;
+}
+
 interface Props {
     stats?: {
         totalList: number;
         totalTask: number;
         tugasSelesai: number;
         tugasPending: number;
+        totalUser: number;
+        totalRole: number;
     };
+    chartData?: ChartDataPoint[];
 }
 
-export default function Dashboard({ stats = {
-    totalList: 0,
-    totalTask:0,
-    tugasSelesai:0,
-    tugasPending:0
-} } : Props) {
+const chartConfig = {
+  desktop: {
+    label: "Tasks",
+    color: "var(--chart-1)",
+  },
+} satisfies ChartConfig
+
+// Helper function untuk hitung trend
+const calculateTrend = (data: ChartDataPoint[]) => {
+    if (data.length < 2) return { trend: 0 };
+
+    const lastMonth = data[data.length - 1].tasks;
+    const previousMonth = data[data.length - 2].tasks;
+
+    if (previousMonth === 0) return { trend: lastMonth > 0 ? 100 : 0 };
+
+    const trend = ((lastMonth - previousMonth) / previousMonth * 100).toFixed(1);
+    return { trend: parseFloat(trend as string) };
+};
+
+export default function Dashboard({
+    stats = {
+        totalList: 0,
+        totalTask: 0,
+        tugasSelesai: 0,
+        tugasPending: 0,
+        totalUser: 0,
+        totalRole: 0,
+    },
+    chartData = []
+}: Props) {
     console.log(stats)
+    console.log(chartData)
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title='Dashboard' />
@@ -42,14 +87,14 @@ export default function Dashboard({ stats = {
                     </div>
 
                     <div className='flex gap-2'>
-                        <Link href='/list'>
-                            <Button className='bg-primary hover:bg-primary/90 text-white shadow-lg'>
+                        <Link href='/lists'>
+                            <Button className='bg-primary hover:bg-primary/90  shadow-lg'>
                                 <List className='h-4 w-4 mr-2'/>
                                 Lihat List
                             </Button>
                         </Link>
                         <Link href='/tasks'>
-                            <Button className='bg-primary hover:bg-primary/90 text-white shadow-lg'>
+                            <Button className='bg-primary hover:bg-primary/90  shadow-lg'>
                                 <CheckCircle className='h-4 w-4 mr-2'/>
                                 Lihat Tugas
                             </Button>
@@ -57,7 +102,7 @@ export default function Dashboard({ stats = {
                     </div>
                 </div>
 
-                <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
+                <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-3'>
                     <Card className='bg-gradient-to-br from-blue-500/10 to-blue-600/10 border-blue-600/20'>
                         <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
                             <CardTitle className='text-sm font-medium text-blue-500'>
@@ -100,7 +145,7 @@ export default function Dashboard({ stats = {
                                 {stats.tugasPending}
                             </div>
                             <p className='text-sm text-muted-foreground'>
-                                Tugas yang belum kamu selesaikan.
+                                Tugas yang belum terselesaikan.
                             </p>
                         </CardContent>
                     </Card>
@@ -119,8 +164,91 @@ export default function Dashboard({ stats = {
                             </p>
                         </CardContent>
                     </Card>
+
+                    <Card className='bg-gradient-to-br from-orange-500/10 to-red-600/10 border-orange-500/20'>
+                        <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+                            <CardTitle className='text-sm font-medium text-orange-500'>
+                                Total User
+                            </CardTitle>
+                            <Users className='h-4 w-4 text-orange-500'/>
+                        </CardHeader>
+                        <CardContent>
+                            <div className='text-2xl font-bold text-orange-500'>{stats.totalUser}</div>
+                            <p className='text-sm text-muted-foreground'>
+                                Pengguna terdaftar
+                            </p>
+                        </CardContent>
+                    </Card>
+                    <Card className='bg-gradient-to-br from-cyan-500/10 to-cyan-600/10 border-cyan-500/20'>
+                        <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+                            <CardTitle className='text-sm font-medium text-cyan-500'>
+                                Total Role
+                            </CardTitle>
+                            <Users className='h-4 w-4 text-cyan-500'/>
+                        </CardHeader>
+                        <CardContent>
+                            <div className='text-2xl font-bold text-cyan-500'>{stats.totalRole}</div>
+                            <p className='text-sm text-muted-foreground'>
+                                Jumlah Role
+                            </p>
+                        </CardContent>
+                    </Card>
                 </div>
+
                 <div className='grid gap-4 md:grid-cols-2'>
+                    <Card className='border-primary/20'>
+                        <CardHeader>
+                            <CardTitle>Area Chart</CardTitle>
+                            <CardDescription>
+                            Menampilkan total Task yang dibuat tiap bulan
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <ChartContainer config={chartConfig}>
+                                <AreaChart
+                                    accessibilityLayer
+                                    data={chartData}
+                                    margin={{
+                                        left: 12,
+                                        right: 12,
+                                    }}
+                                >
+                                    <CartesianGrid vertical={false} />
+                                    <XAxis
+                                        dataKey="month"
+                                        tickLine={false}
+                                        axisLine={false}
+                                        tickMargin={8}
+                                        tickFormatter={(value) => value.slice(0, 3)}
+                                    />
+                                    <ChartTooltip
+                                        cursor={false}
+                                        content={<ChartTooltipContent indicator="line" />}
+                                    />
+                                    <Area
+                                        dataKey="tasks"
+                                        type="natural"
+                                        fill="var(--color-desktop)"
+                                        fillOpacity={0.4}
+                                        stroke="var(--color-desktop)"
+                                    />
+                                </AreaChart>
+                            </ChartContainer>
+                        </CardContent>
+                        <CardFooter>
+                            <div className="flex w-full items-start gap-2 text-sm">
+                                <div className="grid gap-2">
+                                    <div className="flex items-center gap-2 leading-none font-medium">
+                                        Trending {calculateTrend(chartData).trend > 0 ? 'naik' : calculateTrend(chartData).trend < 0 ? 'turun' : 'tetap'} by {Math.abs(calculateTrend(chartData).trend)}% <TrendingUp className="h-4 w-4" />
+                                    </div>
+                                    <div className="text-muted-foreground flex items-center gap-2 leading-none">
+                                        {chartData.length > 0 && `${chartData[0]?.month} - ${chartData[chartData.length - 1]?.month}`}
+                                    </div>
+                                </div>
+                            </div>
+                        </CardFooter>
+                    </Card>
+
                     <Card className='border-primary/20'>
                         <CardHeader>
                             <CardContent>
@@ -144,26 +272,6 @@ export default function Dashboard({ stats = {
                         </CardHeader>
                     </Card>
 
-                    <Card className='border-primary/20'>
-                        <CardHeader>
-                            <CardTitle className='text-lg'>Recent Activity</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                        <div className='space-y-4 '>
-                            <div className='flex items-center gap-4'>
-                                <div className='rounded-full bg-primary/10 p-2'>
-                                    <Plus className='h-4 w-4 text-primary'/>
-                                </div>
-                            <div>
-                                <p className='text-sm font-medium'>Selamat datang di PlaneMate</p>
-                                <p className='text-xs text-muted-foreground'>
-                                    Mulai dengan membuat Tugas atau List
-                                </p>
-                            </div>
-                            </div>
-                        </div>
-                        </CardContent>
-                    </Card>
                 </div>
             </div>
         </AppLayout>
