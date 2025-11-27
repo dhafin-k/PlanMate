@@ -30,7 +30,7 @@ interface Props {
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Mapel',
+        title: 'List',
         href: '/lists',
     }
 ];
@@ -106,7 +106,7 @@ export default function ListsIndex({ lists, flash }: Props){
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title='Matapelajaran'/>
+            <Head title='List'/>
             <div className='flex h-full flex-1 flex-col gap-4 rounded-xl px-8 pt-4'>
                 {showToast && (
                     <div className={`fixed top-4 right-4 z-50 items-center flex gap-2 rounded-lg p-4 shadow-lg ${
@@ -121,7 +121,7 @@ export default function ListsIndex({ lists, flash }: Props){
                     </div>
                 )}
                 <div className='flex justify-between items-center'>
-                    <h1 className='text-2xl font-bold'>Matapelajaran</h1>
+                    <h1 className='text-2xl font-bold'>List Manage</h1>
                     <Dialog open={isOpen} onOpenChange={setIsOpen}>
                         <DialogTrigger asChild>
                             <Button>

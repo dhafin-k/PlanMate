@@ -73,7 +73,6 @@ class TaskController extends Controller
             'list_id' => 'required|exists:list_tables,id',
             'sudah_selesai' => 'boolean',
         ]);
-
         $validated['user_id'] = Auth::id();
 
         TaskTable::create($validated);
@@ -109,7 +108,6 @@ class TaskController extends Controller
             'sudah_selesai' => 'boolean',
         ]);
 
-        $validated['user_id'] = Auth::id();
         $task->update($validated);
 
         return redirect()->route('tasks.index')->with('success', 'Tugas berhasil diupdate.');

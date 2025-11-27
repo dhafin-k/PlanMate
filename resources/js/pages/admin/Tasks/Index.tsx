@@ -3,7 +3,7 @@ import AppLayout from '@/layouts/app-layout';
 import { Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, } from '@/components/ui/card';
-import { Plus, Pencil, Trash2, CheckCircle2, XCircle, List, Calendar, Search, ChevronLeft, ChevronRight, CheckCircle, Ghost, Trash } from 'lucide-react';
+import { Plus, Pencil, Trash2, CheckCircle2, XCircle, List, Calendar, Search, ChevronLeft, ChevronRight, CheckCircle, Ghost, Trash, AlertCircle, ClipboardCheck, CircleCheck, CircleDashed, ListCheck, PlayCircle, ClipboardList } from 'lucide-react';
 import { type BreadcrumbItem } from '@/types';
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, } from '@/components/ui/dialog';
@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useForm } from '@inertiajs/react';
+import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface Task {
@@ -55,7 +56,7 @@ interface Props {
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Tugas',
+        title: 'Task',
         href: '/tasks'
     }
 ]
@@ -121,10 +122,18 @@ export default function TasksIndex({ tasks, lists, filters, flash }: Props) {
 
     const handleEdit = (task: Task) => {
         setEditingTask(task);
+
+        //  Format tanggal ke YYYY-MM-DD untuk inputan tanggal di bagian edit
+        let formattedDeadline = '';
+        if (task.deadline) {
+            const date = new Date(task.deadline);
+            formattedDeadline = date.toISOString().split('T')[0];
+        }
+
         setData({
             judul: task.judul,
             deskripsi: task.deskripsi,
-            deadline: task.deadline || '',
+            deadline:  formattedDeadline,
             list_id: task.list_id.toString(),
             sudah_selesai: task.sudah_selesai,
         });
@@ -189,7 +198,7 @@ export default function TasksIndex({ tasks, lists, filters, flash }: Props) {
 
                 <div className='flex flex-col gap-2'>
                     <div className='flex justify-between items-center'>
-                        <h1 className='text-3xl font-bold tracking-tight'>Tugas</h1>
+                        <h1 className='text-3xl font-bold tracking-tight'>Task Manage</h1>
                         <Dialog open={isOpen} onOpenChange={setIsOpen}>
                             <DialogTrigger asChild>
                                 <Button className='bg-primary hover:bg-primary/90 text-white shadow-lg'>
@@ -203,6 +212,10 @@ export default function TasksIndex({ tasks, lists, filters, flash }: Props) {
                                     <DialogTitle className='text-xl'>
                                         {editingTask ? 'Edit Tugas' : 'Tambah Tugas Baru'}
                                     </DialogTitle>
+
+                                    <DialogDescription>
+                                        Isi form berikut untuk {editingTask ? 'mengubah' : 'menambahkan'} tugas.
+                                    </DialogDescription>
                                 </DialogHeader>
                                 <form onSubmit={handleSubmit} className='space-y-4'>
                                     <div className='space-y-2'>
@@ -247,10 +260,10 @@ export default function TasksIndex({ tasks, lists, filters, flash }: Props) {
                                     </div>
 
                                     <div className='flex items-center space-x-2'>
-                                        <Input type="checkbox"
+                                        <Checkbox
                                             id='sudah_selesai'
                                             checked={data.sudah_selesai}
-                                            onChange={(e) => setData('sudah_selesai', e.target.checked)}
+                                            onCheckedChange={(checked) => setData('sudah_selesai', checked as boolean)}
                                             className='h-4 w-4 rounded border-gray-300 focus:ring-2 focus:ring-primary' />
                                         <Label htmlFor='sudah_selesai'>Selesai</Label>
                                     </div>
@@ -298,6 +311,7 @@ export default function TasksIndex({ tasks, lists, filters, flash }: Props) {
                                     <th className='h-12 px-4 text-left align-middle font-medium text-muted-foreground'>List</th>
                                     <th className='h-12 px-4 text-left align-middle font-medium text-muted-foreground'>Deadline</th>
                                     <th className='h-12 px-4 text-left align-middle font-medium text-muted-foreground'>Status</th>
+                                    <th className='h-12 px-4 text-left align-middle font-medium text-muted-foreground'>Informasi</th>
                                     <th className='h-12 px-4 text-left align-middle font-medium text-muted-foreground'>Aksi</th>
                                 </tr>
                             </thead>
@@ -314,26 +328,65 @@ export default function TasksIndex({ tasks, lists, filters, flash }: Props) {
                                                 {task.list.judul}
                                             </div>
                                         </td>
+
                                         <td className='p-4 align-middle'>
                                             {task.deadline ? (
                                                 <div className='flex items-center gap-2'>
                                                     <Calendar className='h-4 w-4 text-muted-foreground' />
-                                                    {new Date(task.deadline).toLocaleDateString()}
+                                                    {new Date(task.deadline).toLocaleDateString('id-ID', {
+                                                        day: '2-digit',
+                                                        month: '2-digit',
+                                                        year: 'numeric'
+                                                    })}
                                                 </div>
                                             ) : (
                                                 <span className='text-muted-foreground'>Tidak ada deadline</span>
                                             )}
                                         </td>
+
                                         <td className='p-4 align-middle'>
                                             {task.sudah_selesai ? (
                                                 <div className='flex items-center gap-2 text-green-500'>
-                                                    <CheckCircle className='h-4 w-4' />
+
                                                     <span>Selesai</span>
                                                 </div>
                                             ) : (
                                                 <div className='flex items-center gap-2 text-yellow-500'>
-                                                    <span>Pending</span>
+                                                    <span>Menunggu</span>
                                                 </div>
+                                            )}
+                                        </td>
+                                        <td className='p-4 align-middle'>
+                                            {task.deadline ? (
+                                                <div className='flex items-center gap-2'>
+                                                    {!task.sudah_selesai && new Date(task.deadline) < new Date() ? (
+                                                        // Kalau sudah lewat deadline & belum selesai
+                                                        <>
+                                                            <AlertCircle className='h-4 w-4 text-red-500' />
+                                                            <span className='text-red-500 font-medium'>
+                                                                Task Melewati Deadline
+                                                            </span>
+                                                        </>
+                                                    ) : task.sudah_selesai ? (
+                                                        // Kalau sudah selesai
+                                                        <>
+                                                            <CheckCircle className='h-4 w-4 text-green-500' />
+                                                            <span className='text-green-500'>
+                                                                Task Selesai
+                                                            </span>
+                                                        </>
+                                                    ) : (
+                                                        // Kalau masih bisa dikerjakan
+                                                        <>
+                                                            <ClipboardList className='h-4 w-4 text-blue-500' />
+                                                            <span className='text-blue-500'>
+                                                                Task dapat dikerjakan
+                                                            </span>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <span className='text-muted-foreground'>Tidak ada deadline</span>
                                             )}
                                         </td>
                                         <td className='p-4 align-middle'>
@@ -353,6 +406,7 @@ export default function TasksIndex({ tasks, lists, filters, flash }: Props) {
                                                 </Button>
                                             </div>
                                         </td>
+
                                     </tr>
                                 ))}
                                 {tasks.data.length === 0 && (
@@ -413,7 +467,7 @@ export default function TasksIndex({ tasks, lists, filters, flash }: Props) {
                             <AlertDialogCancel>Batal</AlertDialogCancel>
                             <AlertDialogAction
                                 onClick={() => deleteId && handleDelete(deleteId)}
-                                className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
+                                className='bg-destructive text-white hover:bg-destructive/90'
                             >
                                 Hapus
                             </AlertDialogAction>
