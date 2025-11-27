@@ -40,7 +40,7 @@ class ListController extends Controller
             'deskripsi' => $validated['deskripsi'] ?? null,
             'user_id' => Auth::id(),
         ]);
-        return redirect()->route('lists.index')->with('success', 'Matapelajaran berhasil dibuat.');
+        return redirect()->route('lists.index')->with('success', 'List berhasil dibuat.');
     }
 
 
@@ -63,7 +63,7 @@ class ListController extends Controller
         ]);
 
         $list->update($validated);
-        return redirect()->route('lists.index')->with('success', 'Matapelajaran Berhasil diupdate.');
+        return redirect()->route('lists.index')->with('success', 'List Berhasil diupdate.');
     }
 
     /**
@@ -72,6 +72,6 @@ class ListController extends Controller
     public function destroy(ListTable $list)
     {
         $list -> delete();
-        return redirect()->route('lists.index')->with('success', 'Matapelajaran Berhasil dihapus.');
+        return redirect()->route('lists.index')->with('success', 'List Berhasil dihapus.');
     }
 }
