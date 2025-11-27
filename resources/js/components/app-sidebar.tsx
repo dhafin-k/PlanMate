@@ -12,8 +12,9 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
+import { usePage } from '@inertiajs/react';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, ClipboardList, ListTodo } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, ClipboardList, ListTodo, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -32,6 +33,24 @@ const mainNavItems: NavItem[] = [
         href: '/tasks',
         icon: ListTodo,
     },
+    {
+        title: 'User Manage',
+        href: '/users',
+        icon: Users,
+    },
+];
+
+const siswaNavItems: NavItem[] = [
+    {
+        title: 'Dashboard',
+        href: '/siswa/dashboard',
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Tugas Saya',
+        href: '/siswa/tasks',
+        icon: ListTodo,
+    },
 ];
 
 const footerNavItems: NavItem[] = [
@@ -48,8 +67,13 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
+    const { props } = usePage<any>();
+    const currentUser = props?.auth?.user;
+    // Determine role name: try relation -> string -> id mapping
+    const roleName = currentUser?.role?.nama_role ?? currentUser?.role ?? (currentUser?.id_role === 2 ? 'siswa' : undefined);
+    const navItemsToShow = roleName === 'siswa' ? siswaNavItems : mainNavItems;
     return (
-        <Sidebar collapsible="icon" variant="inset">
+        <Sidebar collapsible="icon" variant="inset" className='text-'>
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
@@ -63,11 +87,11 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <NavMain items={navItemsToShow} />
             </SidebarContent>
 
             <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
+                <NavFooter items={footerNavItems} className="mt-auto " />
                 <NavUser />
             </SidebarFooter>
         </Sidebar>
