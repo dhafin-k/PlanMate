@@ -12,6 +12,8 @@ use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
+use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
+use App\Actions\Fortify\LoginResponse as LoginResponseAction;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -28,6 +30,9 @@ class FortifyServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Bind custom LoginResponse to control post-login redirect by role
+        $this->app->singleton(LoginResponseContract::class, LoginResponseAction::class);
+
         $this->configureActions();
         $this->configureViews();
         $this->configureRateLimiting();
